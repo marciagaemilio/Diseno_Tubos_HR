@@ -2,7 +2,7 @@
 
 Herramienta web para el diseño de tubos de hormigón armado (HR) enterrados por el **método indirecto (*D-load*)**, según ASTM C76, el manual de la ACPA (2011) y la carga viva HL-93 de AASHTO LRFD.
 
-**Abrir la herramienta:** https://USUARIO.github.io/Diseno_Tubos_HR/
+**Abrir la herramienta:** https://marciagaemilio.github.io/Diseno_Tubos_HR/
 <!-- Cambie USUARIO por su nombre de usuario de GitHub después de publicar. -->
 
 ## Qué hace
@@ -45,7 +45,7 @@ Desarrollada como parte del trabajo de graduación *Formulación de las especifi
 
 ## Cómo citar
 
-Marciaga-Torres, E. A., y García-Barragán, M. R. (2026). *Diseño de tubos HR* [Aplicación web]. Universidad Tecnológica de Panamá. https://USUARIO.github.io/Diseno_Tubos_HR/
+Marciaga-Torres, E. A., y García-Barragán, M. R. (2026). *Diseño de tubos HR* [Aplicación web]. Universidad Tecnológica de Panamá. https://marciagaemilio.github.io/Diseno_Tubos_HR/
 
 ## Aviso
 
