@@ -1,6 +1,8 @@
-MIT License
+Diseño de tubos HR
+Copyright (c) 2026 Emilio A. Marciaga-Torres, Mario R. García-Barragán and
+Elvis A. Castillo-Camarena
 
-Copyright (c) 2026 Emilio A. Marciaga-Torres, Mario R. García-Barragán and Elvis A. Castillo-Camarena
+This software is licensed under the MIT License.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +21,48 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+Suggested credit line:
+
+  Diseño de tubos HR — Emilio A. Marciaga-Torres and Mario R. García-Barragán
+  (advisor: Dr. Elvis A. Castillo-Camarena), Universidad Tecnológica de Panamá
+  (UTP). Licensed under the MIT License.
+
+License text:  https://opensource.org/license/mit
+
+Disclaimer: Diseño de tubos HR is a support tool developed for academic
+purposes as part of an undergraduate thesis at the Universidad Tecnológica de
+Panamá (UTP). Its results depend on the data entered by the user and on the
+assumptions of the methods it implements; they do not replace the judgment of
+a qualified engineer or the applicable codes and standards, and they must be
+reviewed by the professional responsible for the design before being used in
+a project. Neither the authors, their advisor, nor the Universidad Tecnológica
+de Panamá (UTP) accept any responsibility or liability for the use of the
+application or of its results, or for any damage or loss arising from such
+use.
+
+Included components: the ACADÉMICO tab includes the earth-load and live-load
+web applications by Dr. Elvis A. Castillo-Camarena (UTP). The application does
+not load any external library or resource; it runs entirely in the browser.
+
+---
+
+Licencia (resumen en español)
+
+Este software se distribuye bajo la licencia MIT. Puede usarse, copiarse,
+modificarse, fusionarse, publicarse, distribuirse, sublicenciarse y venderse,
+incluso con fines comerciales, siempre que se conserven el aviso de derechos de
+autor y este aviso de licencia en todas las copias o partes sustanciales del
+software. Se entrega "tal cual", sin garantía de ningún tipo.
+
+Aviso de responsabilidad: Diseño de tubos HR es una herramienta de apoyo
+desarrollada con fines académicos como parte de un trabajo de graduación de la
+Universidad Tecnológica de Panamá (UTP). Sus resultados dependen de los datos
+ingresados y de las hipótesis de los métodos empleados; no sustituyen el
+criterio de un ingeniero idóneo ni las normas vigentes, y deben ser revisados
+por el profesional responsable del diseño antes de usarse en un proyecto. Ni
+los autores, ni su asesor, ni la Universidad Tecnológica de Panamá (UTP)
+asumen responsabilidad alguna por el uso que se haga de la herramienta o de sus
+resultados, ni por los daños o perjuicios que de ello puedan derivarse.
+
+Texto de la licencia: https://opensource.org/license/mit

@@ -1,19 +1,623 @@
-<!doctype html>
-<html lang="es">
+<!DOCTYPE html>
+<html lang="es" data-ui="es" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Diseño de tubos HR</title>
-<meta name="description" content="Herramienta web para el diseño de tubos de hormigón armado (HR) enterrados por el método indirecto (D-load), ASTM C76, ACPA y carga viva HL-93.">
-<meta http-equiv="refresh" content="0; url=Diseno_Tubos_HR.html">
-<link rel="canonical" href="Diseno_Tubos_HR.html">
+<meta name="description" content="Herramienta web para el diseño de tubos de hormigón armado (HR) enterrados por el método indirecto (D-load): ASTM C76, ACPA (2011) y carga viva HL-93. Universidad Tecnológica de Panamá (UTP).">
+<meta name="author" content="Emilio A. Marciaga-Torres, Mario R. García-Barragán">
+<meta property="og:title" content="Diseño de tubos HR">
+<meta property="og:description" content="Diseño de tubos de hormigón armado enterrados por el método indirecto (D-load), en el navegador.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='.5' y='.5' width='31' height='31' rx='7' fill='%2317212b' stroke='%233a4f66'/%3E%3Cpath d='M6.5 11.6h19v16.2h-19z' fill='%23c9a36b'/%3E%3Cpath d='M3.8 11.6h24.4' stroke='%23e8eef4' stroke-width='1.5' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='20.2' r='5.5' fill='%2317212b' stroke='%23fff' stroke-width='2.9'/%3E%3Cpath d='M16 2.6v5.3' stroke='%234dabf7' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M12.9 5.6 16 8.7 19.1 5.6' fill='none' stroke='%234dabf7' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<script>
+  // Idioma y tema antes del primer pintado. El tema usa la misma preferencia
+  // que la herramienta (hrTheme), así ambas páginas se ven igual.
+  (function () {
+    var root = document.documentElement, lang = null, theme = null;
+    try { lang = localStorage.getItem("hrLang"); theme = localStorage.getItem("hrTheme"); } catch (e) {}
+    if (lang !== "es" && lang !== "en") {
+      lang = (navigator.language || "").toLowerCase().indexOf("en") === 0 ? "en" : "es";
+    }
+    root.setAttribute("data-ui", lang);
+    root.setAttribute("lang", lang);
+    root.setAttribute("data-theme", theme === "light" ? "light" : "dark");
+  })();
+</script>
 <style>
-  body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0F1521;color:#E6EDF3;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-  a{color:#58A6FF}
+  :root{
+    --bg:#0f1720; --panel:#17212b; --panel2:#1d2936; --line:#2c3d4f;
+    --txt:#e8eef4; --muted:#93a6b8; --accent:#4dabf7; --accent-ink:#0b1218;
+    --ok:#37b24d; --warn:#f59f00;
+    --cII:#4dabf7; --cIII:#37b24d; --cIV:#fab005; --cV:#f76707; --cE:#fa5252;
+    --top:linear-gradient(180deg,#1b2734,#141d27);
+    --code:#0b1118; --code-txt:#cfe3f5;
+    --shadow:0 22px 48px -28px rgba(0,0,0,.75);
+    --radius:12px;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  :root[data-theme="light"]{
+    --bg:#f4f6f9; --panel:#ffffff; --panel2:#eef2f6; --line:#d3dce6;
+    --txt:#1b2733; --muted:#5f6f7f; --accent:#1c7ed6; --accent-ink:#ffffff;
+    --ok:#2f9e44; --warn:#e67700;
+    --cII:#1c7ed6; --cIII:#2f9e44; --cIV:#f08c00; --cV:#e8590c; --cE:#e03131;
+    --top:linear-gradient(180deg,#ffffff,#eef2f6);
+    --code:#1b2733; --code-txt:#e8eef4;
+    --shadow:0 22px 48px -30px rgba(27,39,51,.45);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+  body{margin:0; background:var(--bg); color:var(--txt); font-family:var(--sans);
+    font-size:16.5px; line-height:1.6; -webkit-font-smoothing:antialiased}
+  html[data-ui="es"] [data-lang="en"], html[data-ui="en"] [data-lang="es"]{display:none !important}
+  a{color:var(--accent)}
+  sub{font-size:.72em; line-height:0}
+  .wrap{max-width:1160px; margin:0 auto; padding:0 28px}
+
+  /* ── barra superior (igual que la de la herramienta) ── */
+  .topbar{position:sticky; top:0; z-index:10; background:var(--top); border-bottom:1px solid var(--line)}
+  .topbar .wrap{display:flex; align-items:center; gap:16px; height:62px}
+  .brand{display:flex; align-items:center; gap:10px; color:var(--txt); text-decoration:none; font-weight:700; font-size:16.5px; white-space:nowrap}
+  .brand svg{width:30px; height:30px; flex:none}
+  .spacer{flex:1}
+  .nav{display:flex; align-items:center; gap:18px; font-size:14.5px}
+  .nav a{color:var(--muted); text-decoration:none}
+  .nav a:hover{color:var(--accent)}
+  .seg{display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden}
+  .seg button{background:transparent; color:var(--muted); border:0; padding:6px 11px; font:inherit; font-size:12.5px; font-weight:700; letter-spacing:.06em; cursor:pointer}
+  .seg button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink)}
+  .themeBtn{width:36px; height:36px; border-radius:50%; border:1px solid var(--line); background:transparent; color:var(--muted); display:grid; place-items:center; cursor:pointer; padding:0}
+  .themeBtn:hover{color:var(--accent); border-color:var(--accent)}
+  .themeBtn svg{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+  :root[data-theme="dark"] .ico-moon, :root[data-theme="light"] .ico-sun{display:none}
+
+  /* ── portada ── */
+  .hero{padding:60px 0 64px}
+  .hero .wrap{display:grid; grid-template-columns:1fr 1.06fr; gap:52px; align-items:center}
+  .eyebrow{margin:0 0 14px; color:var(--accent); font-size:12.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase}
+  h1{margin:0 0 18px; font-size:clamp(38px,5vw,58px); line-height:1.03; letter-spacing:-.02em; font-weight:800; text-wrap:balance}
+  h1 .accent{color:var(--accent)}
+  .lead{margin:0 0 24px; font-size:19px; color:var(--muted); max-width:34em; text-wrap:pretty}
+  .lead b{color:var(--txt); font-weight:600}
+  .byline{display:flex; gap:14px; align-items:center; padding:12px 0; margin:0 0 26px; border-top:1px solid var(--line); border-bottom:1px solid var(--line); font-size:14.5px; color:var(--muted); line-height:1.45}
+  .byline .who{color:var(--txt); font-weight:600}
+  .avatars{display:flex; gap:6px; flex:none}
+  .avatar{width:40px; height:40px; border-radius:50%; flex:none; display:grid; place-items:center; font-weight:700; font-size:14px; letter-spacing:.02em;
+    background:var(--panel2); color:var(--accent); border:1px solid var(--line)}
+  .cta{display:flex; flex-wrap:wrap; gap:12px; align-items:center}
+  .btn{display:inline-flex; align-items:center; gap:9px; padding:12px 22px; border-radius:9px; font:inherit; font-size:16px; font-weight:700; text-decoration:none; border:1px solid transparent; cursor:pointer; transition:background .15s, transform .15s, border-color .15s, color .15s}
+  .btn.primary{background:var(--accent); color:var(--accent-ink)}
+  .btn.primary:hover{transform:translateY(-1px); filter:brightness(1.06)}
+  .btn.ghost{background:transparent; color:var(--txt); border-color:var(--line)}
+  .btn.ghost:hover{border-color:var(--accent); color:var(--accent)}
+  .btn svg{width:18px; height:18px}
+  .trust{display:flex; flex-wrap:wrap; gap:6px 18px; margin:20px 0 0; padding:0; list-style:none; font-size:14px; color:var(--muted)}
+  .trust li{display:inline-flex; align-items:center; gap:7px}
+  .trust li::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--ok)}
+
+  /* figura: el resultado y el esquema que muestra la herramienta */
+  .shot{margin:0; background:var(--panel); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); overflow:hidden}
+  .shot .bar{display:flex; align-items:center; gap:8px; padding:9px 14px; border-bottom:1px solid var(--line); background:var(--panel2); font-size:12px; color:var(--muted)}
+  .shot .bar i{width:9px; height:9px; border-radius:50%; background:var(--line); display:inline-block}
+  .shot .bar span{margin-left:6px; letter-spacing:.04em}
+  .shot .body{display:grid; grid-template-columns:1.12fr .88fr; gap:4px; padding:16px 14px 6px 16px}
+  .sec{margin:0 0 10px; font-size:11.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+  .classCard{border-radius:12px; padding:12px 14px; border:1px solid color-mix(in srgb, var(--cII) 55%, transparent); background:color-mix(in srgb, var(--cII) 10%, transparent);
+    display:grid; grid-template-columns:auto 1fr; gap:2px 14px; align-items:center; margin-bottom:10px}
+  .classCard .lbl{grid-column:1/-1; font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted)}
+  .classCard .big{font-size:42px; font-weight:800; line-height:1; color:var(--cII)}
+  .classCard .dl{font-size:13px}
+  .classCard .dl b{font-size:16px}
+  .classCard .dl .m{display:block; color:var(--muted); font-size:11.5px}
+  .nw{white-space:nowrap}
+  .rule{display:block; width:100%; height:auto; margin:2px 0 8px}
+  .rule .t{fill:var(--txt)} .rule .mu{fill:var(--muted)} .rule .ln{stroke:var(--txt)}
+  .rule .on{fill:var(--accent-ink)}
+  .verdict{border:1px solid color-mix(in srgb, var(--ok) 55%, transparent); background:color-mix(in srgb, var(--ok) 10%, transparent); border-radius:10px; padding:9px 12px; font-size:12.5px; line-height:1.45}
+  .verdict b{display:block; color:var(--ok); font-size:13px}
+  .scheme{display:block; width:100%; height:auto}
+  .scheme .t{fill:var(--txt)} .scheme .ln{stroke:var(--txt)} .scheme .mu{stroke:var(--muted)} .scheme .bgl{fill:var(--bg)}
+  .shot figcaption{padding:8px 16px 12px; border-top:1px dashed var(--line); font-size:12.5px; color:var(--muted)}
+
+  /* ── secciones ── */
+  section.block{padding:64px 0; border-top:1px solid var(--line)}
+  section.block.alt{background:var(--panel)}
+  .kicker{margin:0 0 10px; font-size:12.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--accent)}
+  h2{margin:0 0 18px; font-size:clamp(27px,3.2vw,35px); line-height:1.15; letter-spacing:-.01em; font-weight:800; text-wrap:balance}
+  .prose{max-width:47em}
+  .prose p{margin:0 0 16px; color:var(--muted)}
+  .prose p b{color:var(--txt); font-weight:600}
+  .uses{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:28px}
+  .use{border-left:3px solid var(--cII); padding:4px 0 4px 16px}
+  .use:nth-child(2){border-color:var(--cIII)}
+  .use:nth-child(3){border-color:var(--cIV)}
+  .use h3{margin:0 0 4px; font-size:17.5px}
+  .use p{margin:0; color:var(--muted); font-size:15.5px}
+
+  .features{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:28px}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:22px 22px 20px}
+  section.alt .card{background:var(--bg)}
+  .ic{width:42px; height:42px; border-radius:10px; display:grid; place-items:center; margin-bottom:14px;
+    color:var(--cII); background:color-mix(in srgb, var(--cII) 14%, transparent)}
+  .ic svg{width:23px; height:23px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round}
+  .ic.g{color:var(--cIII); background:color-mix(in srgb, var(--cIII) 14%, transparent)}
+  .ic.y{color:var(--cIV); background:color-mix(in srgb, var(--cIV) 14%, transparent)}
+  .ic.o{color:var(--cV); background:color-mix(in srgb, var(--cV) 14%, transparent)}
+  .ic.v{color:#b197fc; background:color-mix(in srgb, #b197fc 15%, transparent)}
+  :root[data-theme="light"] .ic.v{color:#7048e8}
+  .ic.m{color:var(--muted); background:var(--panel2)}
+  .card h3{margin:0 0 6px; font-size:18px; line-height:1.3}
+  .card p{margin:0; color:var(--muted); font-size:15.5px; line-height:1.55}
+
+  .steps{list-style:none; padding:0; margin:28px 0 0; display:grid; grid-template-columns:repeat(4,1fr); gap:18px; counter-reset:s}
+  .steps li{counter-increment:s; background:var(--bg); border:1px solid var(--line); border-radius:var(--radius); padding:18px; font-size:15.5px; color:var(--muted)}
+  .steps li::before{content:counter(s); display:grid; place-items:center; width:30px; height:30px; border-radius:50%; margin-bottom:10px;
+    background:var(--accent); color:var(--accent-ink); font-size:13.5px; font-weight:800}
+  .steps b{color:var(--txt)}
+  .ui{font-family:var(--mono); font-size:12.5px; white-space:nowrap; background:var(--panel2); border:1px solid var(--line); border-radius:5px; padding:1px 6px; color:var(--txt)}
+  .tips{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px}
+  .tip{border-radius:var(--radius); padding:16px 18px; font-size:15.5px; color:var(--muted); background:var(--bg); border:1px dashed var(--line)}
+  .tip.note{border:1px solid color-mix(in srgb, var(--warn) 55%, transparent); background:color-mix(in srgb, var(--warn) 9%, transparent)}
+  .tip b{color:var(--txt)}
+
+  .credit{display:grid; grid-template-columns:.95fr 1.05fr; gap:22px; margin-top:28px}
+  .people{display:grid; gap:16px}
+  .person{display:flex; gap:14px; align-items:center}
+  .person .avatar{width:52px; height:52px; font-size:17px}
+  .role{font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+  .card .name{margin:1px 0 0; font-size:18.5px; font-weight:700; line-height:1.25; color:var(--txt)}
+  .card .aff{margin:22px 0 0; padding-top:16px; border-top:1px solid var(--line); color:var(--muted); font-size:14.5px; line-height:1.55}
+  .aff i{color:var(--txt)}
+  .license p{margin:0 0 12px; color:var(--muted); font-size:15.5px}
+  .license p b{color:var(--txt)}
+  .badge{display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:12.5px; font-weight:700; border:1px solid var(--txt); border-radius:999px;
+    padding:3px 12px; color:var(--txt); text-decoration:none; margin-bottom:12px}
+  .badge:hover{background:var(--txt); color:var(--bg)}
+  .cite{display:flex; gap:10px; align-items:stretch; margin-top:4px}
+  .cite code{flex:1; display:block; font-family:var(--mono); font-size:13px; line-height:1.55; background:var(--code); color:var(--code-txt); border-radius:9px; padding:12px 14px; white-space:normal}
+  .copy{flex:none; border:1px solid var(--line); background:transparent; border-radius:9px; padding:0 14px; font:inherit; font-size:14px; cursor:pointer; color:var(--muted)}
+  .copy:hover{border-color:var(--accent); color:var(--accent)}
+  .disclaimer{margin-top:22px; border-radius:var(--radius); padding:18px 22px; font-size:15px; color:var(--muted); line-height:1.6;
+    border:1px solid color-mix(in srgb, var(--warn) 55%, transparent); background:color-mix(in srgb, var(--warn) 8%, transparent)}
+  .disclaimer h3{margin:0 0 6px; font-size:16px; color:var(--txt)}
+  .disclaimer p{margin:0}
+  .disclaimer b{color:var(--txt)}
+
+  footer.site{border-top:1px solid var(--line); padding:24px 0 34px; font-size:13.5px; color:var(--muted)}
+  footer.site .wrap{display:flex; flex-wrap:wrap; gap:8px 22px; justify-content:space-between}
+  footer.site a{color:var(--muted)}
+  footer.site a:hover{color:var(--accent)}
+
+  /* ── pantallas pequeñas ── */
+  @media (max-width:980px){
+    .hero .wrap{grid-template-columns:1fr; gap:38px}
+    .features{grid-template-columns:1fr 1fr}
+    .steps{grid-template-columns:1fr 1fr}
+    .credit{grid-template-columns:1fr}
+  }
+  @media (max-width:640px){
+    body{font-size:16px}
+    .wrap{padding:0 16px}
+    .topbar .wrap{gap:10px}
+    .nav{gap:12px}
+    .nav a.hide-sm, .brand span{display:none}
+    .hero{padding:38px 0 46px}
+    .lead{font-size:17.5px}
+    section.block{padding:48px 0}
+    .uses, .features, .steps, .tips{grid-template-columns:1fr}
+    .shot .body{grid-template-columns:1fr; padding:14px}
+    .scheme{max-width:220px; margin:0 auto}
+    .cite{flex-direction:column}
+    .copy{padding:9px 14px}
+  }
 </style>
 </head>
 <body>
-<p>Abriendo <a href="Diseno_Tubos_HR.html">Diseño de tubos HR</a>…</p>
-<script>location.replace('Diseno_Tubos_HR.html' + location.search + location.hash);</script>
+
+<!-- ═════════════ barra superior ═════════════ -->
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Diseño de tubos HR">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x=".5" y=".5" width="31" height="31" rx="7" fill="#17212b" stroke="#3a4f66"/><path d="M6.5 11.6h19v16.2h-19z" fill="#c9a36b"/><path d="M3.8 11.6h24.4" stroke="#e8eef4" stroke-width="1.5" stroke-linecap="round"/><circle cx="16" cy="20.2" r="5.5" fill="#17212b" stroke="#fff" stroke-width="2.9"/><path d="M16 2.6v5.3" stroke="#4dabf7" stroke-width="2.4" stroke-linecap="round"/><path d="M12.9 5.6 16 8.7 19.1 5.6" fill="none" stroke="#4dabf7" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Diseño de tubos HR</span>
+    </a>
+    <div class="spacer"></div>
+    <nav class="nav">
+      <a class="hide-sm" href="#funciones"><span data-lang="es">Funciones</span><span data-lang="en">Features</span></a>
+      <a class="hide-sm" href="#guia"><span data-lang="es">Guía rápida</span><span data-lang="en">Quick start</span></a>
+      <a href="Diseno_Tubos_HR.html"><span data-lang="es">Abrir herramienta</span><span data-lang="en">Open app</span></a>
+    </nav>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-set-lang="es" aria-pressed="false">ES</button>
+      <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+    </div>
+    <button class="themeBtn" id="themeToggle" type="button" title="Cambiar tema" aria-label="Cambiar tema claro u oscuro">
+      <svg class="ico-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+      <svg class="ico-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ═════════════ portada ═════════════ -->
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">
+        <span data-lang="es">ASTM C76 · Método indirecto (D-load) · ACPA 2011 · HL-93</span>
+        <span data-lang="en">ASTM C76 · Indirect design (D-load) · ACPA 2011 · HL-93</span>
+      </p>
+      <h1>Diseño de <span class="accent">tubos HR</span></h1>
+      <p class="lead" data-lang="es">
+        Herramienta web para diseñar tubos de <b>hormigón armado enterrados</b> por el método
+        indirecto: calcula las cargas de tierra, carga viva, fluido y peso propio, obtiene el
+        D-load y la clase de tubo de ASTM C76, y genera la memoria técnica del diseño.
+      </p>
+      <p class="lead" data-lang="en">
+        A web application to design <b>buried reinforced concrete pipe</b> by the indirect
+        method: it computes the earth, live, fluid and pipe-weight loads, finds the D-load and
+        the ASTM C76 pipe class, and produces the technical design report.
+      </p>
+
+      <div class="byline">
+        <div class="avatars" aria-hidden="true"><div class="avatar">EM</div><div class="avatar">MG</div></div>
+        <div>
+          <div><span data-lang="es">Desarrollada por</span><span data-lang="en">Developed by</span>
+            <span class="who">Emilio A. Marciaga-Torres</span> <span data-lang="es">y</span><span data-lang="en">and</span>
+            <span class="who">Mario R. García-Barragán</span></div>
+          <div><span data-lang="es">Asesor:</span><span data-lang="en">Advisor:</span> Dr. Elvis A. Castillo-Camarena · Universidad Tecnológica de Panamá (UTP)</div>
+        </div>
+      </div>
+
+      <div class="cta">
+        <a class="btn primary" href="Diseno_Tubos_HR.html">
+          <span data-lang="es">Abrir la herramienta</span><span data-lang="en">Open the app</span>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg>
+        </a>
+        <a class="btn ghost" href="#guia"><span data-lang="es">Guía rápida</span><span data-lang="en">Quick start</span></a>
+      </div>
+      <ul class="trust">
+        <li><span data-lang="es">Funciona en el navegador</span><span data-lang="en">Runs in your browser</span></li>
+        <li><span data-lang="es">Sin instalación</span><span data-lang="en">No installation</span></li>
+        <li><span data-lang="es">También sin conexión</span><span data-lang="en">Works offline too</span></li>
+        <li><span data-lang="es">Unidades imperiales o SI</span><span data-lang="en">Imperial or SI units</span></li>
+      </ul>
+    </div>
+
+    <!-- resultado y esquema tal como los muestra la herramienta en su estado inicial -->
+    <figure class="shot">
+      <div class="bar" aria-hidden="true"><i></i><i></i><i></i><span>Diseno_Tubos_HR.html · DISEÑO</span></div>
+      <div class="body">
+        <div>
+          <p class="sec"><span data-lang="es">Resultado</span><span data-lang="en">Result</span></p>
+          <div class="classCard">
+            <div class="lbl"><span data-lang="es">Clase de tubo requerida, ASTM C76</span><span data-lang="en">Required pipe class, ASTM C76</span></div>
+            <div class="big">II</div>
+            <div class="dl">D<sub>Load</sub> = <b>834 lb/ft/ft</b>
+              <span class="m" data-lang="es">clase mínima II, resistencia 1000 lb/ft/ft · uso 83,4 %</span>
+              <span class="m" data-lang="en">minimum class II, strength 1000 lb/ft/ft · use 83.4 %</span></div>
+          </div>
+          <svg class="rule" viewBox="0 -4 560 74" role="img" aria-label="D-load = 834 lb/ft/ft sobre la escala de resistencia de las clases II a V de ASTM C76">
+            <rect x="14" y="24" width="161.2" height="20" fill="var(--cII)" opacity=".9"/><text class="on" x="94.6" y="38" font-size="15" font-weight="700" text-anchor="middle">II</text>
+            <rect x="175.2" y="24" width="56.4" height="20" fill="var(--cIII)" opacity=".28"/><text class="t" x="203.4" y="38" font-size="15" font-weight="700" text-anchor="middle">III</text>
+            <rect x="231.6" y="24" width="104.8" height="20" fill="var(--cIV)" opacity=".28"/><text class="t" x="284" y="38" font-size="15" font-weight="700" text-anchor="middle">IV</text>
+            <rect x="336.4" y="24" width="161.2" height="20" fill="var(--cV)" opacity=".28"/><text class="t" x="417" y="38" font-size="15" font-weight="700" text-anchor="middle">V</text>
+            <rect x="497.6" y="24" width="48.4" height="20" fill="var(--cE)" opacity=".28"/><text class="t" x="521.8" y="38" font-size="14" font-weight="700" text-anchor="middle">Esp.</text>
+            <g class="ln" stroke-width="1"><line x1="175.2" y1="22" x2="175.2" y2="48"/><line x1="231.6" y1="22" x2="231.6" y2="48"/><line x1="336.4" y1="22" x2="336.4" y2="48"/><line x1="497.6" y1="22" x2="497.6" y2="48"/></g>
+            <g class="mu" font-size="13.5" text-anchor="middle"><text x="175.2" y="64">1000</text><text x="231.6" y="64">1350</text><text x="336.4" y="64">2000</text><text x="497.6" y="64">3000</text></g>
+            <path class="t" d="M142.5,13 L154.5,13 L148.5,23 z"/><line class="ln" x1="148.5" y1="23" x2="148.5" y2="44" stroke-width="2"/>
+            <text class="t" x="148.5" y="10" font-size="14" font-weight="700" text-anchor="middle">D-load = 834 lb/ft/ft</text>
+          </svg>
+          <div class="verdict">
+            <b data-lang="es">Clase II adecuada</b><b data-lang="en">Class II is adequate</b>
+            <span data-lang="es">El D-load usa el 83,4 % de la resistencia de la clase II, por debajo del umbral de 95 %.</span>
+            <span data-lang="en">The D-load uses 83.4 % of the class II strength, below the 95 % threshold.</span>
+          </div>
+        </div>
+        <svg class="scheme" viewBox="56 38 300 504" role="img" aria-label="Esquema de la instalación en zanja: H = 10,00 ft, Bd = 4,89 ft, Do = 3,67 ft">
+          <defs>
+            <pattern id="ht" width="8" height="8" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#9a8573"/><line x1="0" y1="0" x2="0" y2="8" stroke="#3b2a1c" stroke-width=".9" opacity=".75"/></pattern>
+            <pattern id="bed" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#cda261"/><circle cx="2" cy="2" r="1.35" fill="none" stroke="#7a5a2e" stroke-width=".6" opacity=".6"/><circle cx="6" cy="6" r="1.35" fill="none" stroke="#7a5a2e" stroke-width=".6" opacity=".6"/></pattern>
+            <marker id="ak" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1.2 L9,5 L0,8.8 z" fill="#111"/></marker>
+            <marker id="aw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path class="t" d="M0,1.2 L9,5 L0,8.8 z"/></marker>
+          </defs>
+          <rect x="88" y="66.5" width="57.3" height="429.5" fill="url(#ht)"/><rect x="288.6" y="66.5" width="57.3" height="429.5" fill="url(#ht)"/>
+          <rect x="145.4" y="480" width="143.3" height="16" fill="url(#ht)"/><rect x="145.4" y="66.5" width="143.3" height="413.5" fill="#e6cfa8"/>
+          <rect x="145.4" y="413.4" width="143.3" height="66.6" fill="url(#bed)"/>
+          <path d="M145.4,66.5 L145.4,480 L288.6,480 L288.6,66.5" fill="none" stroke="#111" stroke-width="1.6"/>
+          <line class="ln" x1="88" y1="66.5" x2="346" y2="66.5" stroke-width="1.7"/>
+          <text class="t" x="217" y="56" font-size="16" text-anchor="middle"><tspan data-lang="es">superficie del terreno</tspan><tspan data-lang="en">ground surface</tspan></text>
+          <circle cx="217" cy="413.4" r="53.7" fill="#cdd8e2" stroke="#111" stroke-width="1.3"/><circle cx="217" cy="413.4" r="44" fill="#fff" stroke="#111"/>
+          <line class="mu" x1="66" y1="359.6" x2="206.3" y2="359.6" stroke-width=".8" stroke-dasharray="4 3"/>
+          <line class="ln" x1="66" y1="66.5" x2="66" y2="359.6" stroke-width="1.1" marker-start="url(#aw)" marker-end="url(#aw)"/>
+          <rect class="bgl" x="70" y="192" width="68" height="42" rx="3" opacity=".7"/>
+          <text class="t" x="75" y="209" font-size="17" font-style="italic">H</text><text class="t" x="75" y="228" font-size="14"><tspan data-lang="es">10,00 ft</tspan><tspan data-lang="en">10.00 ft</tspan></text>
+          <line x1="255" y1="375.4" x2="179" y2="451.4" stroke="#111" stroke-width="1.1" marker-start="url(#ak)" marker-end="url(#ak)"/>
+          <rect x="183" y="396" width="68" height="38" rx="3" fill="#fff" opacity=".92"/>
+          <text x="217" y="413" fill="#111" font-size="16" font-style="italic" text-anchor="middle">D<tspan dy="4.5" font-size="12">o</tspan></text>
+          <text x="217" y="429.5" fill="#333" font-size="13" text-anchor="middle"><tspan data-lang="es">3,67 ft</tspan><tspan data-lang="en">3.67 ft</tspan></text>
+          <line class="mu" x1="145.4" y1="480" x2="145.4" y2="517" stroke-width=".8" stroke-dasharray="3 3"/><line class="mu" x1="288.6" y1="480" x2="288.6" y2="517" stroke-width=".8" stroke-dasharray="3 3"/>
+          <line class="ln" x1="145.4" y1="510" x2="288.6" y2="510" stroke-width="1.1" marker-start="url(#aw)" marker-end="url(#aw)"/>
+          <text class="t" x="217" y="531" font-size="17" text-anchor="middle"><tspan font-style="italic">B<tspan dy="4.5" font-size="12.5">d</tspan></tspan><tspan dy="-4.5"> = </tspan><tspan data-lang="es">4,89 ft</tspan><tspan data-lang="en">4.89 ft</tspan></text>
+        </svg>
+      </div>
+      <figcaption>
+        <span data-lang="es">Estado inicial de la herramienta: tubo de 36 in, pared B, en zanja (instalación tipo 2) con H = 10 ft.</span>
+        <span data-lang="en">Initial state of the app: 36 in pipe, wall B, in a trench (type 2 installation) with H = 10 ft.</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ═════════════ utilidad ═════════════ -->
+<section class="block alt" id="utilidad">
+  <div class="wrap">
+    <p class="kicker"><span data-lang="es">Utilidad</span><span data-lang="en">Why use it</span></p>
+    <h2 data-lang="es">Todo el diseño indirecto de un tubo, en una sola pantalla</h2>
+    <h2 data-lang="en">The whole indirect design of a pipe, on one screen</h2>
+    <div class="prose">
+      <p data-lang="es">
+        Diseñar un tubo de hormigón armado enterrado exige combinar varias piezas: la
+        <b>carga de tierra</b> de Marston-Spangler según la condición de instalación, la
+        <b>carga viva</b> HL-93 distribuida a través del relleno, el <b>peso del fluido</b> y el
+        <b>peso propio</b>, los <b>factores de encamado</b> y, al final, la comparación del
+        D-load con la resistencia de las clases de ASTM C76. Hacerlo a mano es largo y cada
+        cambio obliga a repetir el cálculo.
+      </p>
+      <p data-lang="es">
+        Diseño de tubos HR reúne todo ese cálculo, lo actualiza al instante cuando cambia un dato,
+        muestra las verificaciones y el esquema de la instalación, y lo deja documentado en una
+        memoria técnica lista para imprimir.
+      </p>
+      <p data-lang="en">
+        Designing a buried reinforced concrete pipe means combining several pieces: the
+        Marston-Spangler <b>earth load</b> for the installation condition, the HL-93 <b>live
+        load</b> distributed through the fill, the <b>fluid weight</b> and the <b>pipe
+        weight</b>, the <b>bedding factors</b> and, finally, the comparison of the D-load with
+        the strength of the ASTM C76 classes. By hand it is long, and every change means
+        repeating the calculation.
+      </p>
+      <p data-lang="en">
+        Diseño de tubos HR brings all of that together, updates it instantly whenever an input
+        changes, shows the design checks and a sketch of the installation, and documents it in
+        a technical report ready to print.
+      </p>
+    </div>
+    <div class="uses">
+      <div class="use">
+        <h3><span data-lang="es">Diseño de proyectos</span><span data-lang="en">Project design</span></h3>
+        <p data-lang="es">Obtén la clase de tubo y la memoria de cálculo de un tramo en minutos.</p>
+        <p data-lang="en">Get the pipe class and the design report for a run in minutes.</p>
+      </div>
+      <div class="use">
+        <h3><span data-lang="es">Docencia</span><span data-lang="en">Teaching</span></h3>
+        <p data-lang="es">Con la pestaña ACADÉMICO, muestra en vivo cómo cada parámetro cambia las cargas y la clase.</p>
+        <p data-lang="en">With the ACADÉMICO tab, show live how each parameter changes the loads and the class.</p>
+      </div>
+      <div class="use">
+        <h3><span data-lang="es">Revisión de métodos</span><span data-lang="en">Method review</span></h3>
+        <p data-lang="es">Compara en proyección negativa el plano de igual asentamiento exacto, corregido y simplificado.</p>
+        <p data-lang="en">Compare the exact, corrected and simplified plane of equal settlement in negative projection.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════ funciones ═════════════ -->
+<section class="block" id="funciones">
+  <div class="wrap">
+    <p class="kicker"><span data-lang="es">Funciones</span><span data-lang="en">Features</span></p>
+    <h2 data-lang="es">Qué puedes hacer</h2>
+    <h2 data-lang="en">What you can do</h2>
+    <div class="features">
+      <article class="card">
+        <div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5h20"/><path d="M6 5v15h12V5"/><circle cx="12" cy="15" r="3"/></svg></div>
+        <h3><span data-lang="es">Tres condiciones de instalación</span><span data-lang="en">Three installation conditions</span></h3>
+        <p data-lang="es">Zanja, proyección positiva y proyección negativa, con las instalaciones estándar de la ACPA (tipos 1 a 4) y el suelo de relleno.</p>
+        <p data-lang="en">Trench, positive projection and negative projection, with the ACPA standard installations (types 1 to 4) and the fill soil.</p>
+      </article>
+      <article class="card">
+        <div class="ic o"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3v11M2.5 10.5 6 14l3.5-3.5"/><path d="M18 3v11M14.5 10.5 18 14l3.5-3.5"/><path d="M2 20h20"/></svg></div>
+        <h3><span data-lang="es">Todas las cargas</span><span data-lang="en">All the loads</span></h3>
+        <p data-lang="es">Carga de tierra de Marston-Spangler, carga viva HL-93 (camión y tándem) con impacto y distribución de la ACPA, peso del fluido y peso propio.</p>
+        <p data-lang="en">Marston-Spangler earth load, HL-93 live load (truck and tandem) with impact and the ACPA distribution, fluid weight and pipe weight.</p>
+      </article>
+      <article class="card">
+        <div class="ic g"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="9" width="20" height="7" rx="1"/><path d="M8 9v7M12 9v7M17 9v7"/><path d="M6 3.5h4L8 7z"/></svg></div>
+        <h3><span data-lang="es">D-load y clase ASTM C76</span><span data-lang="en">D-load and ASTM C76 class</span></h3>
+        <p data-lang="es">D-load con los factores de encamado, clase mínima y recomendación de la siguiente cuando el uso supera el umbral (95 % por defecto), con sus verificaciones.</p>
+        <p data-lang="en">D-load with the bedding factors, minimum class, and a recommendation of the next one when use exceeds the threshold (95 % by default), with its checks.</p>
+      </article>
+      <article class="card">
+        <div class="ic v"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 7h20" stroke-dasharray="3 2.5"/><path d="M2 3h20"/><circle cx="12" cy="15.5" r="4.5"/></svg></div>
+        <h3><span data-lang="es">Plano de igual asentamiento</span><span data-lang="en">Plane of equal settlement</span></h3>
+        <p data-lang="es">En proyección negativa: solución exacta, corregida (analítica) o la simplificación <span class="nw">H<sub>e</sub> = p′B<sub>d</sub></span> propuesta en este trabajo, y la comparación de los tres métodos.</p>
+        <p data-lang="en">In negative projection: exact solution, corrected (analytical) or the simplification <span class="nw">H<sub>e</sub> = p′B<sub>d</sub></span> proposed in this work, and a comparison of the three methods.</p>
+      </article>
+      <article class="card">
+        <div class="ic y"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2.5H6.5a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V8z"/><path d="M14 2.5V8h5.5M8.5 13h7M8.5 17h7"/></svg></div>
+        <h3><span data-lang="es">Memoria técnica</span><span data-lang="en">Technical report</span></h3>
+        <p data-lang="es">Documento con datos, esquema, cálculos paso a paso, clase recomendada, verificaciones y referencias, que se imprime o se guarda en PDF.</p>
+        <p data-lang="en">A document with inputs, sketch, step-by-step calculations, recommended class, checks and references, ready to print or save as PDF.</p>
+      </article>
+      <article class="card">
+        <div class="ic m"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 8.5 12 4l10 4.5-10 4.5z"/><path d="M6 10.4V15c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.6"/><path d="M22 8.5V14"/></svg></div>
+        <h3><span data-lang="es">Pestaña ACADÉMICO</span><span data-lang="en">ACADÉMICO tab</span></h3>
+        <p data-lang="es">Tres módulos para estudiar el efecto de cada parámetro: carga de tierra, carga viva y D-load y clase de tubo. Unidades imperiales o SI, y tema claro u oscuro.</p>
+        <p data-lang="en">Three modules to study the effect of each parameter: earth load, live load, and D-load and pipe class. Imperial or SI units, and light or dark theme.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════ guía rápida ═════════════ -->
+<section class="block alt" id="guia">
+  <div class="wrap">
+    <p class="kicker"><span data-lang="es">Guía rápida</span><span data-lang="en">Quick start</span></p>
+    <h2 data-lang="es">De los datos del tubo a la memoria técnica en cuatro pasos</h2>
+    <h2 data-lang="en">From pipe data to technical report in four steps</h2>
+    <ol class="steps">
+      <li>
+        <span data-lang="es"><b>Abre la herramienta</b> en cualquier navegador actual: Chrome, Edge, Firefox o Safari.</span>
+        <span data-lang="en"><b>Open the app</b> in any current browser: Chrome, Edge, Firefox or Safari.</span>
+      </li>
+      <li>
+        <span data-lang="es"><b>Define el tubo y la instalación</b> en <span class="ui">DISEÑO</span>: diámetro interior, pared, zanja o proyección, tipo de instalación ACPA y suelo de relleno.</span>
+        <span data-lang="en"><b>Define the pipe and installation</b> in <span class="ui">DISEÑO</span>: inside diameter, wall, trench or projection, ACPA installation type and fill soil.</span>
+      </li>
+      <li>
+        <span data-lang="es"><b>Ajusta las cargas:</b> altura de relleno sobre la corona H, carga viva, fluido y peso propio; el resto está en <span class="ui">Opciones avanzadas</span>.</span>
+        <span data-lang="en"><b>Set the loads:</b> fill height over the crown H, live load, fluid and pipe weight; the rest is under <span class="ui">Opciones avanzadas</span>.</span>
+      </li>
+      <li>
+        <span data-lang="es"><b>Revisa y documenta:</b> lee la clase recomendada y las verificaciones, y genera la memoria con <span class="ui">Ver memoria</span> o <span class="ui">Imprimir / PDF</span>.</span>
+        <span data-lang="en"><b>Review and document:</b> read the recommended class and the checks, and produce the report with <span class="ui">Ver memoria</span> or <span class="ui">Imprimir / PDF</span>.</span>
+      </li>
+    </ol>
+    <div class="tips">
+      <div class="tip">
+        <span data-lang="es"><b>Unidades y tema.</b> Cambia entre unidades imperiales y SI, y entre modo claro y oscuro, desde la barra superior de la herramienta. Todo el cálculo se hace en tu navegador; ningún dato se envía a un servidor.</span>
+        <span data-lang="en"><b>Units and theme.</b> Switch between imperial and SI units, and between light and dark mode, from the app's top bar. All calculations run in your browser; no data is sent to any server.</span>
+      </div>
+      <div class="tip note">
+        <span data-lang="es"><b>Importante.</b> Es una herramienta de apoyo: sus resultados deben ser revisados por el profesional responsable del diseño. Lee el <a href="#aviso">aviso de responsabilidad</a>.</span>
+        <span data-lang="en"><b>Important.</b> This is a support tool: its results must be reviewed by the professional responsible for the design. Read the <a href="#aviso">disclaimer</a>.</span>
+      </div>
+    </div>
+    <div class="cta" style="margin-top:28px">
+      <a class="btn primary" href="Diseno_Tubos_HR.html">
+        <span data-lang="es">Abrir la herramienta</span><span data-lang="en">Open the app</span>
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════ autoría y licencia ═════════════ -->
+<section class="block" id="autoria">
+  <div class="wrap">
+    <p class="kicker"><span data-lang="es">Autoría y licencia</span><span data-lang="en">Authors and license</span></p>
+    <h2 data-lang="es">De uso libre, conservando el crédito</h2>
+    <h2 data-lang="en">Free to use, keeping the credit</h2>
+    <div class="credit">
+      <div class="card">
+        <div class="people">
+          <div class="person"><div class="avatar" aria-hidden="true">EM</div><div><div class="role"><span data-lang="es">Autor</span><span data-lang="en">Author</span></div><p class="name">Emilio A. Marciaga-Torres</p></div></div>
+          <div class="person"><div class="avatar" aria-hidden="true">MG</div><div><div class="role"><span data-lang="es">Autor</span><span data-lang="en">Author</span></div><p class="name">Mario R. García-Barragán</p></div></div>
+          <div class="person"><div class="avatar" aria-hidden="true">EC</div><div><div class="role"><span data-lang="es">Asesor</span><span data-lang="en">Advisor</span></div><p class="name">Dr. Elvis A. Castillo-Camarena</p></div></div>
+        </div>
+        <p class="aff" data-lang="es">
+          Universidad Tecnológica de Panamá (UTP) · Facultad de Ingeniería Civil · Centro Regional de Veraguas.<br>
+          Desarrollada como parte del trabajo de graduación <i>Formulación de las especificaciones de diseño y construcción de tubos HR en Panamá</i> (2026). La pestaña ACADÉMICO incluye las aplicaciones de carga de tierra y de carga viva del Dr. Castillo-Camarena.
+        </p>
+        <p class="aff" data-lang="en">
+          Universidad Tecnológica de Panamá (UTP) · School of Civil Engineering · Veraguas Regional Center.<br>
+          Developed as part of the undergraduate thesis <i>Formulación de las especificaciones de diseño y construcción de tubos HR en Panamá</i> (2026). The ACADÉMICO tab includes the earth-load and live-load apps by Dr. Castillo-Camarena.
+        </p>
+      </div>
+      <div class="card license">
+        <a class="badge" href="https://opensource.org/license/mit" target="_blank" rel="noopener license">MIT</a>
+        <p data-lang="es">
+          Puedes usar, copiar, modificar y distribuir Diseño de tubos HR —en cursos,
+          investigaciones, informes y trabajo profesional, incluso con fines comerciales— bajo la
+          licencia MIT, <b>siempre que conserves el aviso de derechos de autor y de licencia</b>.
+          Se entrega “tal cual”, sin garantía de ningún tipo.
+        </p>
+        <p data-lang="en">
+          You may use, copy, modify and distribute Diseño de tubos HR —in courses, research,
+          reports and professional work, including commercially— under the MIT License,
+          <b>provided you keep the copyright and license notice</b>. It is provided “as is”,
+          without warranty of any kind.
+        </p>
+        <p style="margin-bottom:6px"><span data-lang="es">Texto de crédito sugerido:</span><span data-lang="en">Suggested credit line:</span></p>
+        <div class="cite">
+          <code id="credit-es" data-lang="es">Diseño de tubos HR — Emilio A. Marciaga-Torres y Mario R. García-Barragán (asesor: Dr. Elvis A. Castillo-Camarena), Universidad Tecnológica de Panamá (UTP). Licencia MIT.</code>
+          <code id="credit-en" data-lang="en">Diseño de tubos HR — Emilio A. Marciaga-Torres and Mario R. García-Barragán (advisor: Dr. Elvis A. Castillo-Camarena), Universidad Tecnológica de Panamá (UTP). Licensed under the MIT License.</code>
+          <button type="button" class="copy" id="copy-credit"><span data-lang="es">Copiar</span><span data-lang="en">Copy</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="disclaimer" id="aviso">
+      <h3><span data-lang="es">Aviso de responsabilidad</span><span data-lang="en">Disclaimer</span></h3>
+      <p data-lang="es">
+        Diseño de tubos HR es una herramienta de apoyo desarrollada con fines académicos como parte
+        de un trabajo de graduación de la Universidad Tecnológica de Panamá. Sus resultados dependen
+        de los datos ingresados y de las hipótesis de los métodos empleados; no sustituyen el
+        criterio de un ingeniero idóneo ni las normas vigentes, y deben ser revisados por el
+        profesional responsable del diseño antes de usarse en un proyecto. <b>Ni los autores, ni
+        su asesor, ni la Universidad Tecnológica de Panamá (UTP) asumen responsabilidad alguna</b>
+        por el uso que se haga de la herramienta o de sus resultados, ni por los daños o perjuicios
+        que de ello puedan derivarse.
+      </p>
+      <p data-lang="en">
+        Diseño de tubos HR is a support tool developed for academic purposes as part of an
+        undergraduate thesis at the Universidad Tecnológica de Panamá. Its results depend on the
+        data entered and on the assumptions of the methods it implements; they do not replace the
+        judgment of a qualified engineer or the applicable codes, and they must be reviewed by the
+        professional responsible for the design before being used in a project. <b>Neither the
+        authors, their advisor, nor the Universidad Tecnológica de Panamá (UTP) accept any
+        responsibility or liability</b> for the use of the application or of its results, or for
+        any damage or loss arising from such use.
+      </p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <span>© 2026 Emilio A. Marciaga-Torres, Mario R. García-Barragán <span data-lang="es">y</span><span data-lang="en">and</span> Elvis A. Castillo-Camarena · Universidad Tecnológica de Panamá (UTP)</span>
+    <span>
+      <a href="https://opensource.org/license/mit" target="_blank" rel="noopener license"><span data-lang="es">Licencia MIT</span><span data-lang="en">MIT License</span></a>
+      · <a href="Diseno_Tubos_HR.html"><span data-lang="es">Abrir la herramienta</span><span data-lang="en">Open the app</span></a>
+    </span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+
+  // idioma
+  var buttons = document.querySelectorAll("[data-set-lang]");
+  function setLang(lang) {
+    root.setAttribute("data-ui", lang);
+    root.setAttribute("lang", lang);
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].setAttribute("aria-pressed", buttons[i].getAttribute("data-set-lang") === lang ? "true" : "false");
+    }
+    try { localStorage.setItem("hrLang", lang); } catch (e) {}
+  }
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].addEventListener("click", function () { setLang(this.getAttribute("data-set-lang")); });
+  }
+  setLang(root.getAttribute("data-ui") || "es");
+
+  // tema claro u oscuro (misma preferencia que la herramienta)
+  document.getElementById("themeToggle").addEventListener("click", function () {
+    var t = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+    root.setAttribute("data-theme", t);
+    try { localStorage.setItem("hrTheme", t); } catch (e) {}
+  });
+
+  // copiar el texto de crédito
+  var copyBtn = document.getElementById("copy-credit");
+  copyBtn.addEventListener("click", function () {
+    var lang = root.getAttribute("data-ui");
+    var text = document.getElementById(lang === "en" ? "credit-en" : "credit-es").textContent;
+    var labels = copyBtn.querySelectorAll("[data-lang]");
+    function flash() {
+      labels[0].textContent = "Copiado ✓"; labels[1].textContent = "Copied ✓";
+      setTimeout(function () { labels[0].textContent = "Copiar"; labels[1].textContent = "Copy"; }, 1600);
+    }
+    try { navigator.clipboard.writeText(text).then(flash, function () {}); } catch (e) {}
+  });
+})();
+</script>
 </body>
 </html>
